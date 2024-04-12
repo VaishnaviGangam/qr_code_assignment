@@ -58,15 +58,15 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: VaishnaviGangam/qr_code_assignment:${{ github.sha }} # Uses the Git SHA for tagging
+          tags: vg523/qr_code_assignment:${{ github.sha }} # Uses the Git SHA for tagging
           platforms: linux/amd64,linux/arm64 # Multi-platform support
-          cache-from: type=registry,ref=kaw393939/devops_demo:cache
+          cache-from: type=registry,ref=vg523/qr_code_assignment:cache
           cache-to: type=inline,mode=max
 
       - name: Scan the Docker image
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: "VaishnaviGangam/qr_code_assignment:${{ github.sha }}"
+          image-ref: "vg523/qr_code_assignment:${{ github.sha }}"
           format: "table"
           exit-code: "1" # Fail the job if vulnerabilities are found
           ignore-unfixed: true
