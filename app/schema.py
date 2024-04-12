@@ -2,23 +2,23 @@ from pydantic import BaseModel, HttpUrl, Field, conint
 from typing import List, Optional
 
 class QRCodeRequest(BaseModel):
-    url: HttpUrl = Field(..., description="The URL to encode into the QR code.")
-    fill_color: str = Field(default="red", description="Color of the QR code.", example="black")
-    back_color: str = Field(default="white", description="Background color of the QR code.", example="yellow")
-    size: conint(ge=1, le=40) = Field(default=10, description="Size of the QR code from 1 to 40.", example=20) # type: ignore
+    url: HttpUrl = Field(..., description="Enter the URL to be encoded into the QR Code.")
+    fill_color: str = Field(default="red", description="Color of the QR Code to be created.", example="black")
+    back_color: str = Field(default="white", description="Background color for the QR COde.", example="white")
+    size: conint(ge=1, le=40) = Field(default=10, description="QR Code size.", example=15)
 
     class Config:
         json_schema_extra = {
             "example": {
-                "url": "https://example.com",
+                "url": "https://www.example.com",
                 "fill_color": "black",
-                "back_color": "yellow",
-                "size": 20
+                "back_color": "white",
+                "size": 15
             }
         }
 
 class Link(BaseModel):
-    rel: str = Field(..., description="Relation type of the link.")
+    rel: str = Field(..., description="QR Code link relatin type.")
     href: HttpUrl = Field(..., description="The URL of the link.")
     action: str = Field(..., description="HTTP method for the action this link represents.")
     type: str = Field(default="application/json", description="Content type of the response for this link.")
@@ -34,14 +34,14 @@ class Link(BaseModel):
         }
 
 class QRCodeResponse(BaseModel):
-    message: str = Field(..., description="A message related to the QR code request.")
-    qr_code_url: HttpUrl = Field(..., description="The URL to the generated QR code.")
+    message: str = Field(..., description="Any message related to teh QR Code Working.")
+    qr_code_url: HttpUrl = Field(..., description="The URL encoded in the QR Code.")
     links: List[Link] = Field(default=[], description="HATEOAS links related to the QR code.")
 
     class Config:
         json_schema_extra = {
             "example": {
-                "message": "QR code created successfully.",
+                "message": "QR code has been generated successfully.",
                 "qr_code_url": "https://api.example.com/qr/123",
                 "links": [
                     {
@@ -55,13 +55,13 @@ class QRCodeResponse(BaseModel):
         }
 
 class Token(BaseModel):
-    access_token: str = Field(..., description="The access token for authentication.")
+    access_token: str = Field(..., description="The access token to authenticate the user.")
     token_type: str = Field(default="bearer", description="The type of the token.")
 
     class Config:
         json_schema_extra = {
             "example": {
-                "access_token": "jhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                "access_token": "caacsajkhansaskcaoxaacsjknamcacdkaolasca...",
                 "token_type": "bearer"
             }
         }
@@ -72,6 +72,6 @@ class TokenData(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "username": "user@example.com"
+                "username": "username@example.com"
             }
         }

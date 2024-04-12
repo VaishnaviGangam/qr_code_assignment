@@ -14,8 +14,7 @@ load_dotenv()
 
 def setup_logging():
     """
-    Sets up logging for the application using a configuration file.
-    This ensures standardized logging across the entire application.
+    Configures logging for the application using a configuration file to maintain consistent logging throughout the entire application.
     """
     # Construct the path to 'logging.conf', assuming it's in the project's root.
     logging_config_path = os.path.join(os.path.dirname(__file__), '..', '..', 'logging.conf')
@@ -24,10 +23,10 @@ def setup_logging():
     # Apply the logging configuration.
     logging.config.fileConfig(normalized_path, disable_existing_loggers=False)
 
-def authenticate_user(username: str, password: str):
+def user_authentication(username: str, password: str):
     """
-    Placeholder for user authentication logic.
-    In a real application, replace this with actual authentication against a user database.
+    Temporary implementation for user authentication logic.
+    In a real-world application, this should be replaced with genuine user authentication against a user database.
     """
     # Simple check against constants for demonstration.
     if username == ADMIN_USER and password == ADMIN_PASSWORD:
@@ -38,7 +37,7 @@ def authenticate_user(username: str, password: str):
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
     """
-    Generates a JWT access token. Optionally, an expiration time can be specified.
+    Creates a JWT access token, with the option to specify an expiration time.
     """
     # Copy user data and set expiration time for the token.
     to_encode = data.copy()
@@ -50,8 +49,8 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
 
 def validate_and_sanitize_url(url_str):
     """
-    Validates a given URL string and returns a sanitized version if valid.
-    Returns None if the URL is invalid, ensuring only safe URLs are processed.
+    Checks if a provided URL string is valid and returns a sanitized version if it meets the criteria.
+    If the URL is invalid, None is returned to ensure only safe URLs are handled.
     """
     if validators.url(url_str):
         parsed_url = urlparse(url_str)
@@ -63,8 +62,8 @@ def validate_and_sanitize_url(url_str):
 
 def encode_url_to_filename(url):
     """
-    Encodes a URL into a base64 string safe for filenames, after validating and sanitizing.
-    Removes padding to ensure filename compatibility.
+    Encodes a URL into a base64 string suitable for filenames after validating and sanitizing it. 
+    Padding is removed to ensure compatibility with filenames.
     """
     sanitized_url = validate_and_sanitize_url(str(url))
     if sanitized_url is None:
@@ -75,8 +74,8 @@ def encode_url_to_filename(url):
 
 def decode_filename_to_url(encoded_str: str) -> str:
     """
-    Decodes a base64 encoded string back into a URL, adding padding if necessary.
-    This reverses the process done by `encode_url_to_filename`.
+    Converts a base64 encoded string back into a URL, ensuring proper padding if required. 
+    This operation reverses the encoding process performed by `encode_url_to_filename`.
     """
     padding_needed = 4 - (len(encoded_str) % 4)
     if padding_needed:
@@ -86,8 +85,8 @@ def decode_filename_to_url(encoded_str: str) -> str:
 
 def generate_links(action: str, qr_filename: str, base_api_url: str, download_url: str) -> List[dict]:
     """
-    Generates HATEOAS links for QR code resources, including view and delete actions.
-    This supports the application's RESTful architecture by providing links to possible actions.
+    Creates HATEOAS links for QR code resources, enabling view and delete actions. 
+    This functionality enhances the application's RESTful architecture by offering links to potential actions.
     """
     links = []
     if action in ["list", "create"]:

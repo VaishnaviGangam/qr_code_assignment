@@ -16,7 +16,7 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=on
 
 # Set the working directory inside the container
-WORKDIR /qr-assignment
+WORKDIR /qr_code_assignment
 
 # Install system dependencies
 RUN apt-get update \
@@ -27,14 +27,14 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy only the requirements, to cache them in Docker layer
-COPY ./requirements.txt /qr-assignment/requirements.txt
+COPY ./requirements.txt /qr_code_assignment/requirements.txt
 
 # Install Python dependencies
 RUN pip install --upgrade pip \
     && pip install -r requirements.txt
 
 # Copy the rest of your application's code
-COPY . /qr-assignment
+COPY . /qr_code_assignment
 # Copy the startup script and make it executable
 COPY start.sh /start.sh
 RUN chmod +x /start.sh

@@ -19,9 +19,9 @@ async def test_create_qr_code_unauthorized():
     # Attempt to create a QR code without authentication
     qr_request = {
         "url": "https://example.com",
-        "fill_color": "red",
+        "fill_color": "black",
         "back_color": "white",
-        "size": 10,
+        "size": 20,
     }
     async with AsyncClient(app=app, base_url="http://test") as ac:
         response = await ac.post("/qr-codes/", json=qr_request)
@@ -42,9 +42,9 @@ async def test_create_and_delete_qr_code():
         # Create a QR code
         qr_request = {
             "url": "https://example.com",
-            "fill_color": "red",
+            "fill_color": "black",
             "back_color": "white",
-            "size": 10,
+            "size": 20,
         }
         create_response = await ac.post("/qr-codes/", json=qr_request, headers=headers)
         assert create_response.status_code in [201, 409]  # Created or already exists

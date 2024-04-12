@@ -16,64 +16,66 @@ import logging
 router = APIRouter()
 
 # Setup OAuth2 with Password (and hashing), using a simple OAuth2PasswordBearer scheme
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2 = OAuth2PasswordBearer(tokenUrl="token")
 
 # Define an endpoint to create QR codes
-# It responds to POST requests at "/qr-codes/" and returns data matching the QRCodeResponse model
-# This endpoint is tagged as "QR Codes" in the API docs and returns HTTP 201 when a QR code is created successfully
+# This endpoint handles POST requests at "/qr-codes/" and returns data in accordance with the QRCodeResponse model
+# It's tagged as "QR Codes" in the API documentation and responds with HTTP 201 upon successful QR code creation
 @router.post("/qr-codes/", response_model=QRCodeResponse, status_code=status.HTTP_201_CREATED, tags=["QR Codes"])
-async def create_qr_code(request: QRCodeRequest, token: str = Depends(oauth2_scheme)):
-    # Log the creation request
-    logging.info(f"Creating QR code for URL: {request.url}")
+async def create_qr_code(request: QRCodeRequest, token: str = Depends(oauth2)):
+    # Log the request to create a QR code
+    logging.info(f"Creating a QR code for {request.url}")
     
-    # Encode the URL to a safe filename format
+    # Encode the URL to ensure a safe filename format
     encoded_url = encode_url_to_filename(request.url)
     qr_filename = f"{encoded_url}.png"
     qr_code_full_path = QR_DIRECTORY / qr_filename
 
-    # Construct the download URL for the QR code
+    # Generate the download URL for the QR code
     qr_code_download_url = f"{SERVER_BASE_URL}/{SERVER_DOWNLOAD_FOLDER}/{qr_filename}"
     
     # Generate HATEOAS (Hypermedia As The Engine Of Application State) links for this resource
     links = generate_links("create", qr_filename, SERVER_BASE_URL, qr_code_download_url)
 
-    # Check if the QR code already exists to prevent duplicates
-    if qr_code_full_path.exists():
-        logging.info("QR code already exists.")
-        # If it exists, return a conflict response
-        return JSONResponse(
-            status_code=status.HTTP_409_CONFLICT,
-            content={"message": "QR code already exists.", "links": links}
-        )
+    # Check if the QR code already exists to avoid duplicates
+    if not qr_code_full_path.exists():
+        # Generate the QR code if it does not exist
+        generate_qr_code(request.url, qr_code_full_path, FILL_COLOR, BACK_COLOR, request.size)
+        # Return a response indicating successful creation
+        return QRCodeResponse(message="The QR code was created successfully.", qr_code_url=qr_code_download_url, links=links)
 
-    # Generate the QR code if it does not exist
-    generate_qr_code(request.url, qr_code_full_path, FILL_COLOR, BACK_COLOR, request.size)
-    # Return a response indicating successful creation
-    return QRCodeResponse(message="QR code created successfully.", qr_code_url=qr_code_download_url, links=links)
+    logging.info("The given QR code already exists.")
+    # Return a conflict response if it exists
+    return JSONResponse(
+        status_code=status.HTTP_409_CONFLICT,
+        content={"message": "The QR code already exists.", "links": links}
+    )
 
 # Define an endpoint to list all QR codes
-# It responds to GET requests at "/qr-codes/" and returns a list of QRCodeResponse objects
+# This endpoint handles GET requests at "/qr-codes/" and returns a list of QRCodeResponse objects
 @router.get("/qr-codes/", response_model=List[QRCodeResponse], tags=["QR Codes"])
-async def list_qr_codes_endpoint(token: str = Depends(oauth2_scheme)):
+async def list_qr_codes_endpoint(token: str = Depends(oauth2)):
     logging.info("Listing all QR codes.")
     # Retrieve all QR code files
     qr_files = list_qr_codes(QR_DIRECTORY)
     # Create a response object for each QR code
     responses = [QRCodeResponse(
-        message="QR code available",
+        message="QR code is found",
         qr_code_url=decode_filename_to_url(qr_file[:-4]),  # Decode the filename to the original URL
         links=generate_links("list", qr_file, SERVER_BASE_URL, f"{SERVER_BASE_URL}/{SERVER_DOWNLOAD_FOLDER}/{qr_file}")
     ) for qr_file in qr_files]
     return responses
 
 @router.delete("/qr-codes/{qr_filename}", status_code=status.HTTP_204_NO_CONTENT, tags=["QR Codes"])
-async def delete_qr_code_endpoint(qr_filename: str, token: str = Depends(oauth2_scheme)):
-    logging.info(f"Deleting QR code: {qr_filename}.")
+async def delete_qr_code_endpoint(qr_filename: str, token: str = Depends(oauth2)):
+    logging.info(f"Deleting the QR : {qr_filename}.")
     qr_code_path = QR_DIRECTORY / qr_filename
-    if not qr_code_path.is_file():
-        logging.warning(f"QR code not found: {qr_filename}.")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="QR code not found")
+    if qr_code_path.is_file():
+        delete_qr_code(qr_code_path)
+        # No need to generate or return any links since the 204 response should not contain a body
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    
+    logging.warning(f"The QR code was not available: {qr_filename}.")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="The QR code was not available")
 
-    delete_qr_code(qr_code_path)
-    # No need to generate or return any links since the 204 response should not contain a body
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    

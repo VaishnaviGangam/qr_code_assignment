@@ -4,11 +4,11 @@ services:
   fastapi:
     build: .
     volumes:
-      - ./qr_codes:/qr-assignment/qr_codes # Maps ./qr_codes from your host to /qr-assignment/qr_codes in the container
-      - ./:/qr-assignment/
+      - ./qr_codes:/qr_code_assignment/qr_codes # Maps ./qr_codes from your host to /qr-assignment/qr_codes in the container
+      - ./:/qr_code_assignment/
     environment:
       - QR_CODE_DIR=./qr_codes
-      - FILL_COLOR=red
+      - FILL_COLOR=black
       - BACK_COLOR=white
   nginx:
     image: nginx:latest
