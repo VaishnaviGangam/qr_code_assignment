@@ -1,4 +1,4 @@
-#!/Users/vamshiraj/Dev/projects/sashank-broken-qr/venv/bin/python3
+#!/Users/vamshiraj/Dev/projects/vaishanavi-qr-assignment/venv/bin/python3
 
 # http://www.python.org/doc/2.4.4/lib/module-itertools.html
 import itertools
